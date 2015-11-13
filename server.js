@@ -2,7 +2,11 @@
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    passport = require('passport');
+    LocalStrategy = require('passport-local').Strategy;
 
 // configure bodyParser (for receiving form data)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,14 +20,91 @@ app.set('view engine', 'hbs');
 // connect to mongodb
 mongoose.connect('mongodb://localhost/microblog-app');
 
-// require Post model
-var Post = require('./models/post');
+// require Post and User models
+var Post = require('./models/post'),
+    User = require('./models/user');
+
+// middleware for auth
+app.use(cookieParser());
+app.use(session({
+  secret: 'supersecretkey',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// passport config
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 // HOMEPAGE ROUTE
 
 app.get('/', function (req, res) {
   res.render('index');
+});
+
+
+// AUTH ROUTES
+
+// show signup view
+app.get('/signup', function (req, res) {
+  // if user is logged in, don't let them sign up again
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    res.render('signup');
+  }
+});
+
+// sign up new user, then log them in
+// hashes and salts password, saves new user to db
+app.post('/signup', function (req, res) {
+  // if user is logged in, don't let them sign up again
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    User.register(new User({ username: req.body.username }), req.body.password,
+      function (err, newUser) {
+        passport.authenticate('local')(req, res, function () {
+          res.redirect('/profile');
+        });
+      }
+    );
+  }
+});
+
+// show login view
+app.get('/login', function (req, res) {
+  // if user is logged in, don't let them sign up again
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    res.render('login');
+  }
+});
+
+// log in user
+app.post('/login', passport.authenticate('local'), function (req, res) {
+  res.redirect('/profile');
+});
+
+// log out user
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
+// show user profile page
+app.get('/profile', function (req, res) {
+  // only show profile if user is logged in
+  if (req.user) {
+    res.render('profile', { user: req.user });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
