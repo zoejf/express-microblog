@@ -5,7 +5,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
-    passport = require('passport');
+    passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy;
 
 // configure bodyParser (for receiving form data)
