@@ -5,8 +5,10 @@ var express = require('express'),
     mongoose = require('mongoose'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
-    passport = require('passport');
-    LocalStrategy = require('passport-local').Strategy;
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy,
+    GithubStrategy = require('passport-github').Strategy,
+    oauth = require('./oauth.js');
 
 // configure bodyParser (for receiving form data)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -36,8 +38,42 @@ app.use(passport.session());
 
 // passport config
 passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
+
+// passport-github config
+passport.use(new GithubStrategy({
+  clientID: oauth.github.clientID,
+  clientSecret: oauth.github.clientSecret,
+  callbackURL: oauth.github.callbackURL
+}, function (accessToken, refreshToken, profile, done) {
+  User.findOne({ oauthID: profile.id }, function (err, foundUser) {
+    if (foundUser) {
+      done(null, foundUser);
+    } else {
+      var newUser = new User({
+        oauthID: profile.id,
+        username: profile.username
+      });
+      newUser.save(function (err, savedUser) {
+        console.log('saving user...');
+        done(null, savedUser);
+      });
+    }
+  });
+}));
+
+// serialize and deserialize
+passport.serializeUser(function (user, done) {
+  console.log('serializeUser:', user._id);
+  done(null, user._id);
+});
+passport.deserializeUser(function (id, done) {
+  User.findById(id, function (err, user) {
+    console.log(user);
+    done(null, user);
+  });
+});
 
 
 // HOMEPAGE ROUTE
@@ -106,6 +142,18 @@ app.get('/profile', function (req, res) {
     res.redirect('/login');
   }
 });
+
+app.get('/auth/github', passport.authenticate('github'), function (req, res){
+  // the request will be redirected to github for authentication,
+  // so this function will not be called
+});
+
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
+  function (req, res) {
+    console.log(req.user);
+    res.redirect('/profile');
+  }
+);
 
 
 // API ROUTES
