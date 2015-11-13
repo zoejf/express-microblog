@@ -143,7 +143,7 @@ app.get('/profile', function (req, res) {
   }
 });
 
-app.get('/auth/github', passport.authenticate('github'), function (req, res){
+app.get('/auth/github', passport.authenticate('github'), function (req, res) {
   // the request will be redirected to github for authentication,
   // so this function will not be called
 });
