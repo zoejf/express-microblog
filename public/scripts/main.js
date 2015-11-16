@@ -96,6 +96,29 @@ $(function() {
         }
       });
     })
+
+    // For adding a comment to a post.
+    .on('submit', '.add-comment', function (event) {
+      // Why do we do this?!
+      event.preventDefault();
+
+      // Find the post's id (stored in HTML as `data-id`).
+      var postId = $(this).closest('.post').attr('data-id');
+
+      var comment = $(this).serialize();
+
+      // Create a new comment for a Post.
+      $.post(baseUrl + "/" + postId + "/comments", comment, function (data) {
+        // Find the post we are caching on the FE, could I do this using reduce instead?
+        var post = allPosts.filter(function (p) {
+          return p._id == postId;
+        })[0];
+        post.comments.push(data);
+
+        // Render all posts to view.
+        render();
+      });
+    })
     
     // for delete: click event on `.delete-post` button
     .on('click', '.delete-post', function (event) {

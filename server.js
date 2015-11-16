@@ -35,7 +35,9 @@ app.get('/', function (req, res) {
 // get all posts
 app.get('/api/posts', function (req, res) {
   // find all posts in db
-  Post.find(function (err, allPosts) {
+  Post.find()
+  .populate('comments')
+  .exec(function (err, allPosts) {
     if (err) {
       res.status(500).json({ error: err.message });
     } else {
