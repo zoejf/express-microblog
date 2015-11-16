@@ -19,6 +19,9 @@ mongoose.connect('mongodb://localhost/microblog-app');
 // require Post model
 var Post = require('./models/post');
 
+// Require Comment model making it available to access.
+var Comment = require('./models/comment');
+
 
 // HOMEPAGE ROUTE
 
