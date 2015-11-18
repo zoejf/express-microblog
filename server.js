@@ -2,7 +2,16 @@
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'), 
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy;
+
+// require models
+var Post = require('./models/post');
+var Comment = require('./models/comment');
+var User = require('./models/user');
 
 // configure bodyParser (for receiving form data)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -13,22 +22,86 @@ app.use(express.static(__dirname + '/public'));
 // set view engine to hbs (handlebars)
 app.set('view engine', 'hbs');
 
+// middleware for auth
+app.use(cookieParser());
+app.use(session({
+  secret: 'supersecretkey',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// passport config
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 // connect to mongodb
 mongoose.connect('mongodb://localhost/microblog-app');
-
-// require Post model
-var Post = require('./models/post');
-
-// Require Comment model making it available to access.
-var Comment = require('./models/comment');
 
 
 // HOMEPAGE ROUTE
 
 app.get('/', function (req, res) {
-  res.render('index');
+  res.render('index', { user: req.user });
 });
 
+//AUTH ROUTES
+
+//show signup view
+app.get('/signup', function (req, res) {
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    res.render('signup', { user: req.user });
+  }
+});
+
+//sign up new user, then log them in
+app.post('/signup', function (req, res) {
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    User.register(new User ({ username: req.body.username }), req.body.password, 
+      function (err, newUser) {
+        passport.authenticate('local')(req, res, function() {
+          // res.send('signed up!!');
+          res.redirect('/profile');
+        });
+      }
+    );
+  }
+});
+
+//show login view 
+app.get('/login', function (req, res) {
+  if (req.user) {
+    res.redirect('/profile');
+  } else {
+    res.render('login', { user: req.user });
+  }
+});
+
+//log in user
+app.post('/login', passport.authenticate('local'), function (req, res) {
+  res.redirect('/profile');
+});
+
+//log out user
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
+//show user profile page
+app.get('/profile', function (req, res) {
+  if (req.user) {
+    res.render('profile', { user: req.user });
+  } else {
+    res.redirect('/login');
+  }
+});
 
 // API ROUTES
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sign Up</title>
+
+	<!-- set viewport to device width to make site responsive -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- bootstrap css -->
+	<link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+	<!-- custom styles -->
+	<link rel="stylesheet" type="text/css" href="styles/main.css">
+</head>
+<body>
+	<div class="container">
+		<h2>Sign Up</h2>
+		<br>
+		<form method="POST" action="/signup">
+		  <div class="form-group">
+		    <input type="text" name="username" class="form-control" placeholder="Username" autofocus>
+		  </div>
+		  <div class="form-group">
+		    <input type="password" name="password" class="form-control" placeholder="Password">
+		  </div>
+		  <div class="form-group">
+		    <input type="submit" class="btn btn-block btn-primary" value="Sign Up">
+		  </div>
+		</form>
+	</div>
+
+	<!-- jquery -->
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+	<!-- bootstrap js -->
+	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+	<!-- handlebars -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.3/handlebars.min.js"></script>
+
+	<!-- custom script -->
+	<script type="text/javascript" src="scripts/main.js"></script>
+</body>
+</html>

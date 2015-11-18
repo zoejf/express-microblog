@@ -12,3 +12,12 @@ h1 {
   color: #000;
   opacity: 0.5;
 }
+
+.nav-buttons {
+	float:right;
+	list-style: none;
+}
+
+.nav-buttons li {
+	display: inline;
+}
