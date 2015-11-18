@@ -1,6 +1,7 @@
 // require express and other modules
 var express = require('express'),
     app = express(),
+    hbs = require('hbs'),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'), 
     cookieParser = require('cookie-parser'),
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // serve static files from public folder
 app.use(express.static(__dirname + '/public'));
+hbs.registerPartials(__dirname + '/views/partials');
 
 // set view engine to hbs (handlebars)
 app.set('view engine', 'hbs');
@@ -121,18 +123,24 @@ app.get('/api/posts', function (req, res) {
 
 // create new post
 app.post('/api/posts', function (req, res) {
-  // create new post with form data (`req.body`)
-  var newPost = new Post(req.body);
+  if (req.user) {
+    // create new post with form data (`req.body`)
+    var newPost = new Post(req.body);
 
-  // save new post in db
-  newPost.save(function (err, savedPost) {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json(savedPost);
-    }
-  });
-});
+    // save new post in db
+    newPost.save(function (err, savedPost) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        req.user.posts.push(savedPost);
+        req.user.save();
+        res.json(savedPost);
+      }
+    });
+  } else {
+    res.status(201).json({ error: 'Unauthorized.'});
+  }
+ });
 
 // get one post
 app.get('/api/posts/:id', function (req, res) {

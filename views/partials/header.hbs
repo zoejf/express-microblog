@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Microblog</title>
+
+	<!-- set viewport to device width to make site responsive -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- bootstrap css -->
+	<link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+	<!-- custom styles -->
+	<link rel="stylesheet" type="text/css" href="styles/main.css">
+</head>
+<body>
+<!-- header -->
+  <div class="well">
+    <div class="container">
+      <div class="page-header">
+        <h1>Microblog <small>share your thoughts</small></h1>
+      </div>
+      <ul class="nav-buttons">
+          {{#if user.username}}
+            <li><a href="/profile" class="btn btn-primary">Profile</a></li>
+            <li><a href="/logout" class="btn btn-warning">Log Out</a></li>
+          {{else}}
+    		<li><a href="/signup" class="btn btn-primary">Sign Up</a></li>
+    		<li><a href="/login" class="btn btn-info">Log In</a></li>
+          {{/if}}
+       </ul>
+    </div>
+  </div>
